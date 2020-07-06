@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using Online_Exam_Management_System.Data;
 namespace Online_Exam_Management_System
 {
     public class Startup
@@ -24,6 +21,11 @@ namespace Online_Exam_Management_System
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddDbContext<DataContext> (options =>
+                 options.UseSqlServer (Configuration.GetConnectionString ("DefaultConnection")));
+
+            services.AddMvc ().AddNToastNotifyToastr ();
+            services.AddAuthentication (CookieAuthenticationDefaults.AuthenticationScheme).AddCookie ();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,11 +48,13 @@ namespace Online_Exam_Management_System
 
             app.UseAuthorization();
 
+            app.UseNToastNotify ();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Account}/{action=Login}/{id?}");
             });
         }
     }
